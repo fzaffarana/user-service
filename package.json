@@ -1,0 +1,51 @@
+{
+  "scripts": {
+    "build": "yarn run build:init && yarn run build:js && yarn run build:install",
+    "build:init": "yarn run lint && rm -rf dist && mkdir dist",
+    "build:js": "yarn run tsc -p tsconfig.json",
+    "build:install": "cp package.json dist/ && cd dist && rm -rf tests && yarn install --production",
+    "docker:sh": "docker-compose build && docker-compose run api ash -c \"export NODE_ENV=test && exec ash\"",
+    "lint": "eslint . --ext .ts --ignore-path .gitignore --ignore-pattern internals/scripts",
+    "lint:fix": "eslint . --fix --ext .ts --ignore-path .gitignore --ignore-pattern internals/scripts",
+    "test": "npx jest --setupFiles dotenv/config --runInBand --verbose --forceExit --testTimeout 50000 \"src/tests/.*\\.test\\.ts\"",
+    "check-dependencies": "depcheck --ignores \"pre-commit\"",
+    "ci-pipeline": "npm run check-dependencies && npm run lint && npm run test"
+  },
+  "dependencies": {
+    "@middy/core": "^2.2.0",
+    "@middy/http-cors": "^2.2.0",
+    "@middy/http-error-handler": "^2.2.0",
+    "@middy/http-event-normalizer": "^2.2.0",
+    "@middy/http-json-body-parser": "^2.2.0",
+    "@middy/validator": "^2.2.0",
+    "aws-lambda": "^1.0.6",
+    "http-errors": "^1.8.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.8",
+    "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.76",
+    "@types/http-errors": "^1.8.0",
+    "@types/jest": "^26.0.23",
+    "@types/mongodb": "^3.6.16",
+    "@types/node": "^15.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "depcheck": "^1.4.1",
+    "dotenv": "^10.0.0",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.4.0",
+    "faker": "^5.5.3",
+    "jest": "^27.0.1",
+    "pre-commit": "^1.2.2",
+    "prettier": "^2.2.1",
+    "ts-jest": "^27.0.0",
+    "typescript": "^4.2.4"
+  },
+  "pre-commit": [
+    "lint:fix"
+  ]
+}

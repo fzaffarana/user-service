@@ -1,0 +1,49 @@
+service:
+  name: user-service
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  memorySize: 1024
+  region: ${opt:region, 'us-west-2'}
+  stage: ${opt:stage, 'qa'}
+  versionFunctions: false
+  logRetentionInDays: 30
+  timeout: 30
+  deploymentBucket:
+    name: garnet-local-deployments-${self:provider.stage}
+  environment: ${file(env/.env.${self:provider.stage}.yml):}
+
+resources:
+  Resources:
+    GatewayResponse: ${file(resources/api-responses.yml):GatewayResponse}
+    AuthFailureGatewayResponse: ${file(resources/api-responses.yml):AuthFailureGatewayResponse}
+
+functions:
+  auth:
+    handler: dist/handlers/auth.handler
+    environment:
+      AUTH0_PUBLIC_KEY: ${file(secret.pem)}
+
+  set-credentials:
+    handler: dist/handlers/set-credentials.handler
+    events:
+      - http:
+          method: POST
+          path: /users/credentials
+          authorizer: auth
+          cors: true
+
+  get-credentials:
+    handler: dist/handlers/get-credentials.handler
+    events:
+      - http:
+          method: GET
+          path: /users/credentials
+          authorizer: auth
+          cors: true
+
+package:
+  exclude:
+    - .env.*
+    - secret.pem

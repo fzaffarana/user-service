@@ -1,0 +1,13 @@
+version: '3.7'
+  
+services:
+  api:
+    build: .
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:4.0
